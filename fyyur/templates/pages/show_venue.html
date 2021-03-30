@@ -74,6 +74,15 @@
 		{% endfor %}
 	</div>
 </section>
+<div class="lead">
+	<a href="/venues/{{ venue.id }}/edit"><button class="lead">Edit</button></a>
+	<form action="/venues/{{ venue.id }}/delete" method="post"  style="display: inline;">
+		<input type="submit" value="Delete">
+	</form>
+</div>
+
+	
+
 
 {% endblock %}
 
