@@ -181,7 +181,8 @@ def show_venue(venue_id):
     venue = Venue.query.filter_by(id=venue_id).all()[0]
     upcoming_shows = []
     past_shows =[]
-    for show in venue.shows:
+    shows = Show.query.join(Artist).all()
+    for show in shows:
       if show.startTime > datetime.now():
         upcoming_shows.append({
           "artist_id": show.artist.id, 
@@ -348,7 +349,8 @@ def show_artist(artist_id):
     artist = Artist.query.filter_by(id=artist_id).all()[0]
     upcoming_shows = []
     past_shows =[]
-    for show in artist.shows:
+    shows = Show.query.join(Artist).all()
+    for show in shows:
       if show.startTime > datetime.now():
         upcoming_shows.append({
           "venue_id": show.venue.id, 
