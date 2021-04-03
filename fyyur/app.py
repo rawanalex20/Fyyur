@@ -61,6 +61,8 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, nullable=False, default=True)
     seeking_description = db.Column(db.String)
 
+    shows = db.relationship('Show', backref=db.backref('venues'), lazy="joined")
+
     def __repr__(self):
       return f'<id: {self.id} name: {self.name}>'
 
@@ -78,6 +80,8 @@ class Artist(db.Model):
     website = db.Column(db.String)
     seeking_venue = db.Column(db.Boolean, nullable=False, default=True)
     seeking_description = db.Column(db.String)
+
+    shows = db.relationship('Show', backref=db.backref('artists'), lazy="joined")
 
     def __repr__(self):
       return f'<id: {self.id} name: {self.name}>'
@@ -175,28 +179,23 @@ def show_venue(venue_id):
   data={}
   try:
     venue = Venue.query.filter_by(id=venue_id).all()[0]
-    shows = Show.query.filter_by(venue_id=venue.id).all()
-    num_shows = 0
     upcoming_shows = []
     past_shows =[]
-    for show in shows:
-      artist = Artist.query.filter_by(id=show.artist_id)
+    for show in venue.shows:
       if show.startTime > datetime.now():
         upcoming_shows.append({
-          "artist_id": artist.id, 
-          "artist_name": artist.name,
-          "artist_image_link": artist.image_link,
-          "start_time": show.startTime
+          "artist_id": show.artist.id, 
+          "artist_name": show.artist.name,
+          "artist_image_link": show.artist.image_link,
+          "start_time": str(show.startTime)
           })
-        num_shows = num_shows + 1
       else:
         past_shows.append({
-          "artist_id": artist.id, 
-          "artist_name": artist.name,
-          "artist_image_link": artist.image_link,
-          "start_time": show.startTime
+          "artist_id": show.artist.id, 
+          "artist_name": show.artist.name,
+          "artist_image_link": show.artist.image_link,
+          "start_time": str(show.startTime)
           })
-    past_shows_num = len(shows) - num_shows
     data={
       "id": venue.id,
       "name": venue.name,
@@ -211,8 +210,8 @@ def show_venue(venue_id):
       "image_link": venue.image_link,
       "past_shows": past_shows,
       "upcoming_shows": upcoming_shows,
-      "past_shows_count": past_shows_num,
-      "upcoming_shows_count": num_shows
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows)
     }
   except:
     error=True
@@ -347,28 +346,23 @@ def show_artist(artist_id):
   data={}
   try:
     artist = Artist.query.filter_by(id=artist_id).all()[0]
-    shows = Show.query.filter_by(artist_id=artist.id).all()
-    num_shows = 0
     upcoming_shows = []
     past_shows =[]
-    for show in shows:
-      venue = Venue.query.filter_by(id=show.venue_id)
+    for show in artist.shows:
       if show.startTime > datetime.now():
         upcoming_shows.append({
-          "venue_id": venue.id, 
-          "venue_name": venue.name,
-          "venue_image_link": venue.image_link,
+          "venue_id": show.venue.id, 
+          "venue_name": show.venue.name,
+          "venue_image_link": show.venue.image_link,
           "start_time": show.startTime
           })
-        num_shows = num_shows + 1
       else:
         past_shows.append({
-          "venue_id": venue.id, 
-          "venue_name": venue.name,
-          "venue_image_link": venue.image_link,
-          "start_time": show.startTime
+          "venue_id": show.venue.id, 
+          "venue_name": show.venue.name,
+          "venue_image_link": show.venue.image_link,
+          "start_time": str(show.startTime)
           })
-    past_shows_num = len(shows) - num_shows
     data={
       "id": artist.id,
       "name": artist.name,
@@ -382,8 +376,8 @@ def show_artist(artist_id):
       "image_link": artist.image_link,
       "past_shows": past_shows,
       "upcoming_shows": upcoming_shows,
-      "past_shows_count": past_shows_num,
-      "upcoming_shows_count": num_shows
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows)
     }
   except:
     error=True
@@ -578,7 +572,7 @@ def create_show_submission():
   try:
     artist_id = request.form.get("artist_id") 
     venue_id = request.form.get("venue_id")
-    startTime = request.form.get("startTime")
+    startTime = request.form.get("start_time")
     show_venue = Venue.query.get(venue_id)
     show_artist = Artist.query.get(artist_id)
     show_venue.artists = [show_artist]
@@ -593,9 +587,9 @@ def create_show_submission():
   finally:
     db.session.close()
     if error:
-        flash('Show was successfully listed!')
-    else:
         flash('An error occurred show could not be listed.')
+    else:
+        flash('Show was successfully listed!')
   return render_template('pages/home.html')
 
 
@@ -627,7 +621,7 @@ if not app.debug:
 
 # Default port:
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5000, debug=True)
 
 # Or specify port manually:
 '''
