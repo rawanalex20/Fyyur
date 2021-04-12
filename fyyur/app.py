@@ -202,7 +202,7 @@ def create_venue_submission():
     if not error:
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
     else:
-        flash('An error occurred. Venue ' + name + ' could not be listed.')
+        flash('An error occurred. Venue ' + venue.name + ' could not be listed.')
       
   return render_template('pages/home.html')
   
@@ -235,8 +235,6 @@ def delete_venue(venue_id):
     else:
       flash('An error occured. Venue ' + name + ' could not be deleted.')
 
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
   return render_template('pages/home.html')
 
 #  Artists
@@ -355,7 +353,7 @@ def edit_artist(artist_id):
         flash('Could not populate fields')
  
 
-  # TODO: populate form with fields from artist with ID <artist_id>
+  
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -367,9 +365,12 @@ def edit_artist_submission(artist_id):
     artist.name = form.name.data 
     artist.city = form.city.data
     artist.state = form.state.data
-    artist.address = form.address.data
     artist.phone = form.phone.data
     artist.facebook_link = form.facebook_link.data
+    artist.image_link = form.image_link.data
+    artist.website = form.website.data
+    #artist.seeking_venue = form.seeking_venue.data
+    artist.seeking_description = form.seeking_description.data
     db.session.commit()
   except:
     db.session.rollback()
@@ -397,7 +398,7 @@ def edit_venue(venue_id):
   finally:
     if error:
         flash('Could not populate fields')
-  # TODO: populate form with values from venue with ID <venue_id>
+ 
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -412,6 +413,10 @@ def edit_venue_submission(venue_id):
     venue.address = form.address.data 
     venue.phone = form.phone.data 
     venue.facebook_link = form.facebook_link.data 
+    venue.image_link = form.image_link.data
+    venue.website = form.website.data
+    #venue.seeking_talent = form.seeking_talent.data
+    venue.seeking_description = form.seeking_description.data
     db.session.commit()
   except:
     db.session.rollback()
@@ -452,7 +457,7 @@ def create_artist_submission():
     if not error:
         flash('Artist ' + request.form['name'] + ' was successfully listed!')
     else:
-        flash('An error occurred. Venue ' + name + ' could not be listed.')
+        flash('An error occurred. Venue ' + artist.name + ' could not be listed.')
   return render_template('pages/home.html')
 
 #  Shows
@@ -493,16 +498,11 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   error = False
+  form = ShowForm(request.form)
   try:
-    artist_id = request.form.get("artist_id") 
-    venue_id = request.form.get("venue_id")
-    startTime = request.form.get("start_time")
-    show_venue = Venue.query.get(venue_id)
-    show_artist = Artist.query.get(artist_id)
-    show_venue.artists = [show_artist]
-    show_artist.venues = [show_venue]
-    new_show = Show(artist_id=artist_id, venue_id=venue_id, startTime=startTime)
-    db.session.add(new_show)
+    show = Show()
+    form.populate_obj(show)
+    db.session.add(show)
     db.session.commit()
   except:
     db.session.rollback()

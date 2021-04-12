@@ -83,10 +83,10 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone', validators=[DataRequired()]
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -115,6 +115,19 @@ class VenueForm(Form):
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+    seeking_description = StringField(
+        'seeking_description', validators=[DataRequired()]
+    )
+    seeking_talent = SelectField(
+        'seeking_talent', validators=[AnyOf([True, False])],
+        choices=[
+            (True, True),
+            (False, False),
+        ]
     )
 
 class ArtistForm(Form):
@@ -215,6 +228,19 @@ class ArtistForm(Form):
     facebook_link = StringField(
         # TODO implement enum restriction
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+    seeking_description = StringField(
+        'seeking_description', validators=[DataRequired()]
+    )
+    seeking_venue = SelectField(
+        'seeking_venue', validators=[DataRequired()],
+        choices=[
+            ('True', 'True'),
+            ('False', 'False'),
+        ]
     )
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
