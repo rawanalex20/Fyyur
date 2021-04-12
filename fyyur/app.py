@@ -19,7 +19,7 @@ from flask import (
 from flask_moment import Moment
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import FlaskForm as Form
 from forms import *
 from flask_migrate import Migrate
 from models import db, Show, Artist, Venue
